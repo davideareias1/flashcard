@@ -66,7 +66,9 @@ export async function GET(request: Request) {
     );
 
     if (!response.ok) {
-      throw new Error(`Pixabay API error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error(`Pixabay API error: ${response.statusText}`, errorText);
+      throw new Error(`Pixabay API error: ${response.status} - ${response.statusText}`);
     }
 
     const data = (await response.json()) as PixabayResponse;
