@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-interface GermanNoun {
+type GermanNoun = {
     article: string;
     word: string;
     translation: string;
@@ -14,7 +14,6 @@ export async function GET() {
         const fileContent = await fs.readFile(filePath, 'utf-8');
         const lines = fileContent.split('\n').filter(line => line.trim());
 
-        // Get random line
         const randomLine = lines[Math.floor(Math.random() * lines.length)];
         const [article, word, translation] = randomLine.split(',');
 
@@ -22,7 +21,7 @@ export async function GET() {
             article,
             word,
             translation
-        });
+        } satisfies GermanNoun);
     } catch (error) {
         console.error('Error reading flashcard:', error);
         return NextResponse.json(

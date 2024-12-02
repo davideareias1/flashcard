@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { Toast } from "@/components/ui/toast";
-import { useToast } from "@/hooks/use-toast"
 import {
     Card,
     CardContent,
@@ -25,13 +23,14 @@ export default function Flashcard() {
     const [currentCard, setCurrentCard] = useState<Flashcard | null>(null);
     const [loading, setLoading] = useState(false);
     const [correctAnswers, setCorrectAnswers] = useState<Set<string>>(() => {
-        const saved = localStorage.getItem('correctAnswers');
-        return saved ? new Set(JSON.parse(saved)) : new Set();
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('correctAnswers');
+            return saved ? new Set(JSON.parse(saved)) : new Set();
+        }
+        return new Set();
     });
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
     const [hasAnswered, setHasAnswered] = useState(false);
-
-    const { toast } = useToast();
 
     const fetchImage = async (word: string) => {
         try {
@@ -46,7 +45,7 @@ export default function Flashcard() {
         return null;
     };
 
-    const fetchNewCard = async () => {
+    const fetchNewCard = useCallback(async () => {
         setLoading(true);
         try {
             const response = await fetch('/api/flashcard');
@@ -60,11 +59,11 @@ export default function Flashcard() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchNewCard();
-    }, []);
+    }, [fetchNewCard]);
 
     const handleAnswer = (selectedArticle: string) => {
         if (!currentCard || hasAnswered) return;
